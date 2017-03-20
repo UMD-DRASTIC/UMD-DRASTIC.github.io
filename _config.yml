@@ -14,6 +14,8 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 title: "DRASᐧTIC: Digital Repository at Scale that Invites Computation"
+org_description: A project of the Digital Curation Innovation Center in the School of Information Studies, University of Maryland at College Park
+org_link: "http://dcic.umd.edu"
 email: jansen+drastic@umd.edu
 description: > # this means to ignore newlines until "baseurl:"
   A community-based, open source software project that provides a distributed

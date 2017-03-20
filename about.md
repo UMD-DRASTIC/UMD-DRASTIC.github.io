@@ -24,3 +24,6 @@ Drastic's core features center around the management of folders, files, and key-
 
 ## Architecture
 Drastic is written in Python and we have chosen an AGPL license to ensure that the source code will always be freely available, including derivative projects. The code can be found on GitHub (https://github.com/UMD-DRASTIC/). Drastic's persistence layer is the [Apache Cassandra](http://cassandra.apache.org/) database, a distributed wide-column store, originally developed by Facebook and currently in use by many web-scale businesses. Cassandra achieves high throughput on demand, at any scale, by relaxing the usual consistency requirements of databases. This trade-off works very well for most operations on repository data, which tend to be written once and often in large batches, with more data added incrementally over time. In addition we are discovering extra value in the Cassandra persistence layer, including parallel computation, graph database features, and the ability to scale *down* a cluster.
+
+## Project History
+The Drastic community project emerged from a data archives startup company, Archive Analytics Systems Ltd.
