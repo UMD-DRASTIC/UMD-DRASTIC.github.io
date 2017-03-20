@@ -1,0 +1,15 @@
+---
+layout: post
+title:  "Moving Toward 1.0"
+date:   2017-03-20 10:13:56 -0400
+categories: development update
+---
+We at the DCIC have been using DRAS-TIC internally for approximately two years and have subjected it to some rigorous stress testing. Since we inherited the codebase last summer, we have been working to refine and package this software for use by a broader community. We are now planning a first stable release of the software.
+
+There are several obvious improvements we need to support a public release, including expanded documentation, and improved server deployment scripts. We use [Ansible playbooks](https://github.com/UMD-DRASTIC/drastic-deploy) to deploy DRAS-TIC into our cluster environment, but these can be made more adaptive to other infrastructure.
+
+We also want to switch the user metadata store to a Cassandra-hosted graph database, instead of the current Cassandra tables. There are two graph packages that are available, the [Datastax Graph](https://www.datastax.com/products/datastax-enterprise-graph) and [JanusGraph](http://janusgraph.org/). We'll be using the [Tinkerpop API](http://tinkerpop.apache.org/) to maintain compatibility with both systems, but we'll start development against the Datastax Graph.
+
+Lastly, we'd like to create a rapid development/test environment for those who wish to explore DRAS-TIC without setting up a cluster. This will most likely be a [Docker Compose](https://docs.docker.com/compose/) environment that brings up the core DRAS-TIC services as docker containers.
+
+When we have more to report, you'll hear it here first, starting with our 1.0 release plans.
