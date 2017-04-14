@@ -1,0 +1,59 @@
+---
+layout: post
+title:  "Replicating Metadata into the Graph"
+date:   2017-03-20 10:13:56 -0400
+categories: development update
+---
+I just finished pushing a major new feature branch to github, "dsegraph", which stands for [Datastax Enterprise Graph](http://www.datastax.com/products/datastax-enterprise-graph). In this branch the Cassandra nodes will run the DSE Graph service, which gives us a [Tinkerpop-compatible](http://tinkerpop.apache.org/docs/current/reference/#preface) graph store that is persisted in Cassandra. Datastax provides a graph service with the longest track record of support, but it does requires a license. By using the Tinkerpop API and Gremlin in particular, our code will remain compatible with other Cassandra graph stores in the future, such as [JanusGraph](http://janusgraph.org/).
+
+## What's in the Graph
+
+So far the graph includes a "resource" Vertex for every folder and file in Drastic. Each Vertex is annotated with properties that reflect the user's key/value metadata, entered via web form or CDMI API. Each folder Vertex has a "contains" Edge that connects it to each of its constituent folders and files. Each Vertex also has a name property and a UUID that is shared with the record in our Cassandra tables.
+
+The graph has enough information to perform interesting traversals of collections. Such traversals could be used to connect Vertices in more interesting ways, based on shared features.
+
+## OLTP and OLAP and You
+
+A graph is open to two modes of computation and query, typically called transactional and analytic or on-line transaction processing (OLTP) and on-line analytical processing (OLAP). Transactional processing is intended to be fast, returning answers quickly enough that a person might wait for them. Analytic processing is a long-running job that performs work or returns answers in minutes, hours, or days. The key difference between OLTP and OLAP is indexing and identifying Vertices. If you know at which Vertex your traversal begins (and you can find it), then you are likely in the transactional mode. A traversal proceeding from a known point can be efficient. In contrast an analytical traversal may not begin from a known point in the graph. Instead it may involve a "full scan" of all Vertices in search of matching properties or matching patterns of edges and neighbors.
+
+It is important for Drastic that all API-related graph operations remain "transactional", i.e. avoiding full scans and going directly to data that needs to be updated. Given that each node in Drastic has a UUID, all we have to do is make sure that this UUID is indexed in our graph for quick retrieval.
+
+## Catalog Futures
+
+One avenue I'd like to research is the efficiency of storing the entire archival catalog in the Graph, including access controls and other system metadata. That would leave only the binary file data in DRAS-TIC's Cassandra tables. Currently some queries, especially the one that gathers a folder's contents for the web UI, are not scaling well. If there are thousands of files in a folder, the HTTP request will timeout before the folder view renders. This is not a problem when getting folder content via CDMI, because more information is required for the web interface. I'm hoping that OLTP can save us from this situation, since it can gather more information in one traversal operation. This is the next thing to explore..
+
+## Building the Graph Feature Branch
+
+You can find the full details about running the Vagrant version of DRAS-TIC on our [Vagrant page](/vagrant/).
+
+1. Clone the Drastic repository codebase as usual, if you have not already, placing git project folders in the same parent folder, including drastic-deploy.
+
+1. Switch each of the drastic, drastic-web, and drastic-deploy folders to the 'dsegraph' branch (repeat):
+
+    $ git checkout dsegraph
+
+1. Change to the drastic-deploy project folder.
+
+1. Vagrant up!
+
+You mileage may vary, as my integration testing is on the 'libvirt' virtualization provider, not virtualbox. However, if you can run a ubuntu16 virtual machine in vagrant, the rest should be the same.
+
+## Details on Working with Datastax Enterprise Graph
+
+These are some hard won findings for anyone else seeking to provision servers with DSE v5.0 Graph.
+
+### No Gremlin REST Service
+
+Datastax Graph includes the Gremlin web service, but it only runs a websockets connector. Even though it may answer your HTTP requests, you will only see a 403 Forbidden response. DRAS-TIC connects to Gremlin via the gremlin-python library over websocket.
+
+### DSE Gremlin Console
+
+DSE ships with a gremlin-console program. If you ssh to your Cassandra node (w/Graph enabled), then you can run "dse gremlin-console" to bring up the console. However, if you are deploying a server with specific configuration it is easy to break the console's default network configuration such that it doesn't connect. That's because the Gremlin server always runs on whichever network interface is configured for Cassandra RPC, but the console is configured to connect to localhost. So if Cassandra is configured on a specific external interface, the console will fail to connect. Edit /etc/dse/graph/gremlin-console/conf/remote.yaml to fix this.
+
+### Unattended Provisioning of Graph and Schema
+
+The Vagrant multi-machine setup for DRAS-TIC uses Ansible for provisioning. Many steps, all in the right order, but we need unattended configuration, which I found a bit challenging against DSE Graph. The heavy way to do it would be to write a Python script that connects over the web socket, but this is a complicated strategy and requires injecting a bunch of configuration in a new place. Instead I found a better way in the gremlin-console's groovy init script, located at /etc/dse/graph/gremlin-console/scripts/dse-init.groovy .
+
+In Ansible I replace this file with a copy that has my own init lines appended, which create the DRAS-TIC graph and schema. The Ansible command module then starts the gremlin-console in the background, sleeps for 60 seconds, then kills the background process. Gremlin console runs our script, calling our init lines, then waits to get killed off. In a subsequent step, Ansible replaces the init script with the original.
+
+I haven't done much scripting using the 'expect' command, but that seems like another way to do it. An expect script could wait for the 'gremlin>' prompts and then enter the graph commands. I was surprised that the gremlin-console doesn't have the typical -e or -c option to run a script from the command-line and then exit.

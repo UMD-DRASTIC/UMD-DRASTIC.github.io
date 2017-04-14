@@ -8,7 +8,9 @@ permalink: /vagrant/
 
 This local environment is built with exactly the same Ansible playbooks that are used on real clusters. The resulting machines are similar enough to be useful for DRAS-TIC development and testing.
 
-*NOTE* When switching between git branches it may be necessary to destroy and recreate the Vagrant environment, especially since some branches use an entirely different version of Cassandra.
+*Note* A "deploy_local_code" variable is set in Vagrantfile passed to the Ansible playbooks. When set to true, Ansible will deploy local sources from directories next to drastic-deploy. When set to false, the master branch of DRAS-TIC code is obtained, compiled, and deployed from the online git repositories. Please continue to use a branch for any major feature development.
+
+*NOTE* that when switching between git branches of drastic-deploy it may be necessary to destroy and recreate the Vagrant environment, especially since some branches use an entirely different version of Cassandra.
 
 ## Step by Step
 
@@ -37,8 +39,6 @@ If you use a different virtualization "provider" than VirtualBox, please supply 
 The "vagrant up" command creates three virtual machines, two Cassandra nodes and one web server. Many software packages and libraries will be downloaded as
 DRAS-TIC is configured locally.
 
-*Note* DRAS-TIC code is obtained, compiled, and deployed from the online git repositories and not from local sources. Use a branch for development.
-
 ## Vagrant Machines
 
 The environment includes these machines:
@@ -48,3 +48,5 @@ The environment includes these machines:
 * node-3: DRAS-TIC webserver
 
 The DRAS-TIC webserver will have an HTTP server running on port 80, which is forwarded to 8080 on your host machine. To reach the DRAS-TIC web interface, point your browser to: http://localhost:8080/.
+
+If you find that the web server is not available when "vagrant up" completes, I've often found it helps to issue as "vagrant reload" command. This reestablishes the forwarding of node-3's port 80 to the local port 8080.
