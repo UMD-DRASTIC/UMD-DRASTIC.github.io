@@ -4,7 +4,7 @@ title:  "Replicating Metadata into the Graph"
 date:   2017-03-20 10:13:56 -0400
 categories: development update
 ---
-I just finished pushing a major new feature branch to github, "dsegraph", which stands for [Datastax Enterprise Graph](http://www.datastax.com/products/datastax-enterprise-graph). In this branch the Cassandra nodes will run the DSE Graph service, which gives us a [Tinkerpop-compatible](http://tinkerpop.apache.org/docs/current/reference/#preface) graph store that is persisted in Cassandra. Datastax provides a graph service with the longest track record of support, but it does requires a license. By using the Tinkerpop API and Gremlin in particular, our code will remain compatible with other Cassandra graph stores in the future, such as [JanusGraph](http://janusgraph.org/).
+I just finished pushing a major new feature branch to github, "dsegraph", which stands for [Datastax Enterprise Graph](http://www.datastax.com/products/datastax-enterprise-graph). In this branch the Cassandra nodes will run the DSE Graph service, which gives us a [Tinkerpop-compatible](http://tinkerpop.apache.org/docs/current/reference/#preface) graph store that is persisted in Cassandra. Datastax provides a graph service with the longest track record of support, but it does require a license. By using the Tinkerpop API and Gremlin in particular, our code will remain compatible with other Cassandra graph stores in the future, such as [JanusGraph](http://janusgraph.org/).
 
 ## What's in the Graph
 
