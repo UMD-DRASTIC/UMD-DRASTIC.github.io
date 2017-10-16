@@ -33,3 +33,6 @@ gems:
 exclude:
   - Gemfile
   - Gemfile.lock
+
+# Uncomment out the line below for Docker; this is so the container's port can be exposed and mapped to an outside port
+host: 0.0.0.0
